@@ -21,16 +21,29 @@ public class Launcher
     public void run()
     {
         initPlayerList();
-        
-        browser.Navigate().GoToUrl("http://saucelabs.com");
-        Console.WriteLine("End goto");
-        IWebElement header = browser.FindElement(By.Id("site - header"));
 
+        browser.Navigate().GoToUrl("https://www.easports.com/fr/fifa/ultimate-team/web-app/");
+        Console.WriteLine("End goto");
+        //IWebElement header = browser.FindElement(By.Id("site - header"));
+        // Login("delcroix.cedric62@gmail.com","Cedric62100");
         foreach (Player player in playerList)
         {
             GotoMarket();
             FindPlayer(player);
         }
+    }
+
+    public void Login(string mail, string pass)
+    {
+        Thread.Sleep(10000);
+        IWebElement connexion = browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
+        connexion.Click();
+        IWebElement email = browser.FindElement(By.XPath("//input[@type='email']"));
+        email.SendKeys(mail);
+        IWebElement passwd = browser.FindElement(By.XPath("//input[@type='password']"));
+        passwd.SendKeys(pass);
+        IWebElement btnLogin = browser.FindElement(By.Id("btnLogin"));
+        btnLogin.Click();
     }
 
     public void initPlayerList()
@@ -43,14 +56,30 @@ public class Launcher
 
     public void GotoMarket()
     {
-        IWebElement header = browser.FindElement(By.Id("site - header"));
+        Thread.Sleep(10000);
+        IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
+        transferButton.Click();
+        Thread.Sleep(500);
+        IWebElement marketPlace = browser.FindElement(By.ClassName("ut-tile-transfer-market"));
+        Thread.Sleep(500);
+        marketPlace.Click();
         Console.WriteLine("On market");
     }
 
     public void FindPlayer(Player p)
     {
-        IWebElement header = browser.FindElement(By.Id("site - header"));
+        IWebElement playerInput = browser.FindElement(By.XPath("//input[@placeholder='Saisissez nom joueur']"));
+        playerInput.SendKeys(p.name);
+        SetPrice(p);
         tryBuyPlayer(p);
+    }
+
+    public void SetPrice(Player p)
+    {
+        IWebElement achatImmediat = browser.FindElement(By.XPath("//h1[text() ='Prix achat immédiat :']"));
+        IWebElement Max = achatImmediat.FindElement(By.XPath("//following-sibling::span[text() = 'Max']"));
+        IWebElement inputPrice = Max.FindElement(By.XPath("/following-sibling::input[@placeholder='Tout']"));
+        
     }
 
     public bool IsPlayerFind(Player p)
