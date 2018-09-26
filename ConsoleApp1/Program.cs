@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,10 @@ namespace ConsoleApp1
             //getCookies();
             ChromeOptions chOption = new ChromeOptions();
             chOption.AddArgument("user-data-dir=D:/Profiles/cdelcroix/AppData/Local/Google/Chrome");
-            IWebDriver driver = new ChromeDriver(chOption);
+            //IWebDriver driver = new ChromeDriver(chOption);
+            FirefoxOptions fOption = new FirefoxOptions();
+            fOption.AddArgument("user-data-dir=C:/Users/cedric/AppData/Local/Mozilla/Firefox/Profiles");
+            IWebDriver driver = new FirefoxDriver(fOption);
             // create file named Cookies to store Login Information		
 
             //foreach (CustomCookie cookie in cookies)

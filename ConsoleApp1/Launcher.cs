@@ -12,7 +12,7 @@ public class Launcher
     public static List<Player> playerList = new List<Player>();
     IWebDriver browser;
     int count = 0;
-    private static Double POURCENTAGE_VENTE = 10.00;
+    private static Double POURCENTAGE_VENTE = 12.00;
 
     public Launcher(IWebDriver b)
     {
@@ -26,7 +26,7 @@ public class Launcher
         browser.Navigate().GoToUrl("https://www.easports.com/fr/fifa/ultimate-team/web-app/");
         Console.WriteLine("End goto");
         //Login("delcroix.cedric62@gmail.com","Cedric62100");
-        Thread.Sleep(14000);
+        Thread.Sleep(20000);
         //ReListerTout()
         foreach (Player player in playerList)
         {
@@ -166,6 +166,7 @@ public class Launcher
         try
         {
             IWebElement element = browser.FindElement(By.XPath("//button[contains(@class,'btn-navigation')][1]"));
+            Thread.Sleep(300);
             element.Click();
             Thread.Sleep(300);
             IWebElement minimumPrice = browser.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Min')]/parent::div/following-sibling::div/button[contains(@class,'decrement-value')]"));
@@ -198,6 +199,7 @@ public class Launcher
         try
         {
             IWebElement offreButton = browser.FindElement(By.XPath("//button[contains(text(),'Achat immédiat')]"));
+            Thread.Sleep(100);
             offreButton.Click();
             Thread.Sleep(300);
             IWebElement confirmeoffreButton = browser.FindElement(By.XPath("//button[contains(text(),'Ok')]"));
@@ -278,7 +280,10 @@ public class Launcher
         {
             Thread.Sleep(500);
             IWebElement minimumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix de départ')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
-            minimumPrice.SendKeys(((p.price * POURCENTAGE_VENTE) - 100).ToString());
+            Thread.Sleep(100);
+            minimumPrice.Clear();
+            Thread.Sleep(100);
+            minimumPrice.SendKeys(((p.price + p.price * POURCENTAGE_VENTE) - 100).ToString());
         }
         catch(OpenQA.Selenium.NoSuchElementException)
         {
@@ -292,7 +297,10 @@ public class Launcher
         {
             Thread.Sleep(500);
             IWebElement maximumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix achat immédiat')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
-            maximumPrice.SendKeys((p.price * POURCENTAGE_VENTE).ToString());
+            Thread.Sleep(100);
+            maximumPrice.Clear();
+            Thread.Sleep(100);
+            maximumPrice.SendKeys((p.price + p.price * POURCENTAGE_VENTE).ToString());
         }
         catch
         {
