@@ -52,7 +52,7 @@ public class Launcher
     public void initPlayerList()
     {
         //playerList.Add(new Player("Alex Oxlade-Chamberlain", 2800));
-        playerList.Add(new Player("yedlin", 3800));
+        playerList.Add(new Player("yedlin", 4100));
         //playerList.Add(new Player("Williams", 4700));
         /*playerList.Add(new Player("", 0));
         playerList.Add(new Player("", 0));*/
@@ -266,6 +266,10 @@ public class Launcher
                 setMaximumPriceSold(p);
                 IWebElement listerElement = browser.FindElement(By.XPath("//span[contains(text(),'Lister élément')]"));
                 lister.Click();
+            }
+            else
+            {
+                RetryBuyPlayer(p);
             }
         }
         catch(OpenQA.Selenium.NoSuchElementException)

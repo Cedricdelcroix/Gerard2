@@ -20,10 +20,16 @@ namespace ConsoleApp1
             //getCookies();
             ChromeOptions chOption = new ChromeOptions();
             chOption.AddArgument("user-data-dir=D:/Profiles/cdelcroix/AppData/Local/Google/Chrome");
-            //IWebDriver driver = new ChromeDriver(chOption);
-            FirefoxOptions fOption = new FirefoxOptions();
-            fOption.AddArgument("user-data-dir=C:/Users/cedric/AppData/Local/Mozilla/Firefox/Profiles");
-            IWebDriver driver = new FirefoxDriver(fOption);
+            IWebDriver driver = new ChromeDriver(chOption);
+
+            //FirefoxProfile profile = new FirefoxProfile("D:/Profiles/cdelcroix/AppData/Local/Mozilla/Firefox/Profiles");
+            //Proxy proxy = new Proxy();
+            //proxy.ProxyAutoConfigUrl = "http://wpad.lill.fr.sopra/wpad.dat ";
+            //FirefoxOptions firefoxOptions = new FirefoxOptions();
+            //firefoxOptions.AddArguments("- profile", "D:/Profiles/cdelcroix/AppData/Local/Mozilla/Firefox/Profiles");
+            //firefoxOptions.Proxy = proxy;
+            ////firefoxOptions.Profile = profile;
+            //IWebDriver driver = new FirefoxDriver(firefoxOptions);
             // create file named Cookies to store Login Information		
 
             //foreach (CustomCookie cookie in cookies)
