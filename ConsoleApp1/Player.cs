@@ -13,13 +13,18 @@ namespace ConsoleApp1
         public string place { get; set; }
         public int numberOfItem { get; set; }
         public int numberMaxItem { get; set; }
+        public int nbOfTry { get; set; }
 
+        public Player()
+        {
+        }
 
-        public Player(string name, int price)
+        public Player(string name, int price, int numberMaxItem = 1, int nbOfTry = 4)
         {
             this.name = name;
             this.price = price;
-            numberMaxItem = 1;
+            this.numberMaxItem = numberMaxItem;
+            this.nbOfTry = nbOfTry;
         }
     }
 }
