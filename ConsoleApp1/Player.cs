@@ -19,7 +19,7 @@ namespace ConsoleApp1
         {
         }
 
-        public Player(string name, int price, int numberMaxItem = 1, int nbOfTry = 4)
+        public Player(string name, int price, int numberMaxItem = 1, int nbOfTry = 2)
         {
             this.name = name;
             this.price = price;
