@@ -3,6 +3,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,8 +12,10 @@ using System.Timers;
 public class Launcher
 {
     public static List<Player> playerList = new List<Player>();
+    List<Player> playersOnMarcket = new List<Player>();
     IWebDriver browser;
     int count = 0;
+    private static Double POURCENTAGE_ACHAT = 5.00;
     private static Double POURCENTAGE_VENTE = 10.00;
     private static int nbSearch = 20;
     private int timeWaiting = 60000;
@@ -26,36 +29,19 @@ public class Launcher
     }
 
 
-    public void initPlayerList(int priceStart, int priceEnd)
+    public void initPlayerList(int priceStart, int priceEnd, int pageIndex)
     {
 
 
-        //playerList.Add(new Player("Alex Oxlade-Chamberlain", 2800));
-        //playerList.Add(new Player("Joshua King", 700));
+        //playerList.Add(new Player("gregersen", 300));
+        // playerList.Add(new Player("lasse nilsen", 300));
         //playerList.Add(new Player("Doucouré", 1500));
         //playerList.Add(new Player("Lerma", 600));
         //playerList.Add(new Player("Masuaku", 1100));
-
-        //playerList.Add(new Player("ashley young", 1500));
-        //playerList.Add(new Player("andreas christensen", 1500));
-        //playerList.Add(new Player("manuel akanji", 1100));
-        //playerList.Add(new Player("bakambu", 800));
-        //playerList.Add(new Player("Yannick kessié", 1100));
-        //playerList.Add(new Player("keita baldé", 1300));
-        //playerList.Add(new Player("michail antonio", 1500));
-        //playerList.Add(new Player("andre gray", 1300));
-        //playerList.Add(new Player("Wilson", 1500));
-        //playerList.Add(new Player("Giroud", 2300));
-        //playerList.Add(new Player("Nathan Aké", 1700));
-        //playerList.Add(new Player("Smalling", 2500));
-        //playerList.Add(new Player("Ndidi", 2400));
-        //playerList.Add(new Player("yedlin", 3500));
-        //playerList.Add(new Player("ben yedder", 7500));
-        //playerList.Add(new Player("ousmane dembélé", 8000));
-
-        browser.Navigate().GoToUrl("https://www.futbin.com/players?page=1&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc");
+        playerList.Clear();
+        playersOnMarcket.Clear();
+        browser.Navigate().GoToUrl("https://www.futbin.com/players?page="+pageIndex+"&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc");
         var elemTable = browser.FindElement(By.XPath("//table[@id = 'repTb']/tbody"));
-
         List<IWebElement> listItem = new List<IWebElement>(elemTable.FindElements(By.TagName("tr")));
         foreach (var elem in listItem)
         {
@@ -71,6 +57,7 @@ public class Launcher
 
     public int convertPrice(string price)
     {
+        price = price.Replace(" ", "");
         if (string.Empty != price)
         {
             if (price.Contains("K"))
@@ -109,26 +96,68 @@ public class Launcher
         }
     }
 
-    public void run()
+    public bool canClick()
     {
-        initPlayerList(0,5000);
-        //SetTimer();
-        browser.Navigate().GoToUrl("https://www.easports.com/fr/fifa/ultimate-team/web-app/");
-        Console.WriteLine("End goto");
-        //Login("delcroix.cedric62@gmail.com","Cedric62100");
-        Thread.Sleep(15000);
-        //ReListerTout()
-        
-        foreach (Player player in playerList)
+        try
         {
-            nbOfTry = 0;
-            lock (lockthis)
+            browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
+            return true;
+        }
+        catch(NoSuchElementException)
+        {
+            return false;
+        }
+    }
+
+    public void clickConnection()
+    {
+        try
+        {
+            if (canClick())
             {
-                GotoMarket();
-                CurrentPlayer = player;
-                FindPlayer(player);
+                IWebElement connexion = browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
+                connexion.Click();
+                Console.WriteLine("Connexion clique");
             }
         }
+        catch(WebDriverException)
+        {
+            clickConnection();
+            Console.WriteLine("Connexion clique missss");
+        }
+    }
+
+    public void run()
+    {
+        for (int i = 1; i < 4; i++)
+        {
+            initPlayerList(0, 5000, i);
+            //SetTimer();
+            browser.Navigate().GoToUrl("https://www.easports.com/fr/fifa/ultimate-team/web-app/");
+            Console.WriteLine("End goto");
+            Thread.Sleep(5000);
+            clickConnection();
+            //Login("delcroix.cedric62@gmail.com","Cedric62100");
+            Thread.Sleep(10000);
+            //ReListerTout()
+
+            GetPlayersOnMarcketList();
+
+            foreach (Player player in playerList)
+            {
+                nbOfTry = 0;
+                lock (lockthis)
+                {
+                    if (!IsPlayerOnMarcketList(player))
+                    {
+                        GotoMarket();
+                        CurrentPlayer = player;
+                        FindPlayer(player);
+                    }
+                }
+            }
+        }
+        run();
     }
 
     public void Login(string mail, string pass)
@@ -216,7 +245,7 @@ public class Launcher
             IWebElement element = browser.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Max')]/parent::div/following-sibling::div/div/input"));
             element.Clear();
             Thread.Sleep(300);
-            element.SendKeys(Convert.ToInt32(p.price / (1 + POURCENTAGE_VENTE / 100)).ToString());
+            element.SendKeys(Convert.ToInt32(p.price / (1 + POURCENTAGE_ACHAT / 100)).ToString());
             Console.WriteLine("recherche de : " + p.name + " au prix de " + p.price);
         }
         catch(OpenQA.Selenium.WebDriverException)
@@ -226,6 +255,21 @@ public class Launcher
         }
     }
 
+    public bool IsBuyable(string time)
+    {
+        List<string> buyableTime = new List<string> { "55 minutes", "56 minutes", "57 minutes", "58 minutes", "59 minutes", "1 Heure", "1 heure" };
+        foreach (string s in buyableTime)
+        {
+            if(s == time)
+            {
+                return true;
+                Console.WriteLine("buyable");
+            }
+        }
+        Console.WriteLine("not buyable");
+        return false;
+    }
+
     public bool IsPlayerFind(Player p)
     {
         // si le joueur est trouver essayer de l'acheter 
@@ -233,8 +277,16 @@ public class Launcher
         {
             Thread.Sleep(500);
             browser.FindElement(By.XPath("//div[contains(@class, 'pagingContainer')]/following-sibling::ul/li"));
-            Console.WriteLine(p.name + " trouvé");
-            return true;
+            IWebElement time = browser.FindElement(By.XPath("//span[contains(@class,'time')]"));
+            if (IsBuyable(time.Text))
+            {
+                Console.WriteLine(p.name + " trouvé");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         catch (OpenQA.Selenium.NoSuchElementException)
         {
@@ -361,17 +413,22 @@ public class Launcher
         }
     }
 
+    public void GoToMarcketList()
+    {
+        Thread.Sleep(300);
+        IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
+        transferButton.Click();
+        Thread.Sleep(300);
+        IWebElement transferListButton = browser.FindElement(By.XPath("//h1[text() = 'Liste de transferts']"));
+        transferListButton.Click();
+        Thread.Sleep(300);
+    }
+
     public void ReListerTout()
     {
         try
         {
-            Thread.Sleep(300);
-            IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
-            transferButton.Click();
-            Thread.Sleep(300);
-            IWebElement transferListButton = browser.FindElement(By.XPath("//h1[text() = 'Liste de transferts']"));
-            transferListButton.Click();
-            Thread.Sleep(300);
+            GoToMarcketList();
 
             if (IsSomethingToList())
             {
@@ -421,7 +478,7 @@ public class Launcher
             setMaximumPriceSold(p);
             IWebElement listerElement = browser.FindElement(By.XPath("//button[contains(text(),'Lister élément')]"));
             listerElement.Click();                
-            Console.WriteLine("joueur mise sur la liste des transferts");
+            Console.WriteLine("joueur mis sur la liste des transferts");
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
@@ -439,7 +496,7 @@ public class Launcher
             Thread.Sleep(1000);
             minimumPrice.Click();
             minimumPrice.Click();
-            minimumPrice.SendKeys((p.price).ToString());
+            minimumPrice.SendKeys((p.price+p.price*POURCENTAGE_VENTE/100).ToString());
             maximumPrice.Click();
         }
         catch(OpenQA.Selenium.WebDriverException)
@@ -458,7 +515,7 @@ public class Launcher
             Thread.Sleep(1000);
             maximumPrice.Click();
             maximumPrice.Click();
-            maximumPrice.SendKeys((p.price).ToString());
+            maximumPrice.SendKeys((p.price+p.price * POURCENTAGE_VENTE / 100).ToString());
             minimumPrice.Click();
         }
         catch(OpenQA.Selenium.WebDriverException)
@@ -466,4 +523,89 @@ public class Launcher
             setMaximumPriceSold(p);
         }
     }
+
+    public bool IsPlayerOnMarcketList(Player player)
+    {
+        foreach (Player p in playersOnMarcket)
+        {
+            if (RemoveDiacritics(player.name).ToLower().Contains(RemoveDiacritics(p.name).ToLower()) || RemoveDiacritics(p.name).ToLower().Contains(RemoveDiacritics(player.name).ToLower()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static string RemoveDiacritics(string text)
+    {
+        var normalizedString = text.Normalize(NormalizationForm.FormD);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var c in normalizedString)
+        {
+            var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+            if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+            {
+                stringBuilder.Append(c);
+            }
+        }
+
+        return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    public bool IsSomethingToErase()
+    {
+        try
+        {
+            Thread.Sleep(300);
+            IWebElement reList = browser.FindElement(By.XPath("//button[contains(text(), 'Effacer') and not(contains(@style, 'display: none'))]"));
+            return true;
+        }
+        catch (NoSuchElementException)
+        {
+            return false;
+        }
+    }
+
+
+    public void GetPlayersOnMarcketList()
+    {
+        try {
+            //GoTo marcket List
+            GoToMarcketList();
+            if (IsSomethingToList())
+            {
+                IWebElement reList = browser.FindElement(By.XPath("//button[contains(text(), 'Re-lister tout')]"));
+                reList.Click();
+                Thread.Sleep(300);
+                IWebElement yesButton = browser.FindElement(By.XPath("//button[contains(text(), 'Oui')]"));
+                yesButton.Click();
+                Thread.Sleep(300);
+                Console.WriteLine("Tous les joueurs ont été relisté");
+            }
+
+            if (IsSomethingToErase())
+            {
+                IWebElement listerElement = browser.FindElement(By.XPath("//button[contains(text(),'Effacer')]"));
+                listerElement.Click();
+            }
+            ICollection<IWebElement> elemTable = browser.FindElements(By.XPath("//ul[contains(@class,'itemList')]/li[contains(@class,'listFUTItem')]"));
+
+
+            foreach (IWebElement elem in elemTable)
+            {
+                IWebElement nameElement = elem.FindElement(By.CssSelector(".name"));
+                IWebElement priceElement = elem.FindElement(By.XPath("//span[contains(text(),'Achat imm')]/following-sibling::span"));
+                if (!priceElement.Text.Equals("0"))
+                {
+                    playersOnMarcket.Add(new Player(nameElement.Text, convertPrice(priceElement.Text)));
+                }
+            }
+        }
+        catch(OpenQA.Selenium.WebDriverException)
+        {
+            GetPlayersOnMarcketList();
+        }
+        }
+    
 }
