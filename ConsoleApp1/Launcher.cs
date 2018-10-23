@@ -19,8 +19,10 @@ public class Launcher
     private static Double POURCENTAGE_VENTE = 10.00;
     private static int nbSearch = 20;
     private int timeWaiting = 60000;
+    private int nbTryCatch = 0;
     private static System.Timers.Timer aTimer;
     Player CurrentPlayer = new Player();
+    public int coins = 0;
     static Object lockthis = new object();
     int nbOfTry = 0;
     public Launcher(IWebDriver b)
@@ -31,8 +33,6 @@ public class Launcher
 
     public void initPlayerList(int priceStart, int priceEnd, int pageIndex)
     {
-
-
         //playerList.Add(new Player("gregersen", 300));
         // playerList.Add(new Player("lasse nilsen", 300));
         //playerList.Add(new Player("Doucouré", 1500));
@@ -40,7 +40,7 @@ public class Launcher
         //playerList.Add(new Player("Masuaku", 1100));
         playerList.Clear();
         playersOnMarcket.Clear();
-        browser.Navigate().GoToUrl("https://www.futbin.com/players?page="+pageIndex+"&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc");
+        browser.Navigate().GoToUrl("https://www.futbin.com/players?page="+pageIndex+"&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc&version=all_nif");
         var elemTable = browser.FindElement(By.XPath("//table[@id = 'repTb']/tbody"));
         List<IWebElement> listItem = new List<IWebElement>(elemTable.FindElements(By.TagName("tr")));
         foreach (var elem in listItem)
@@ -109,6 +109,14 @@ public class Launcher
         }
     }
 
+    public void checkNbTryCatch()
+    {
+        if( nbTryCatch > 40)
+        {
+            run();
+        }
+    }
+
     public void clickConnection()
     {
         try
@@ -116,23 +124,41 @@ public class Launcher
             if (canClick())
             {
                 IWebElement connexion = browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
+                Thread.Sleep(2000);
                 connexion.Click();
                 Console.WriteLine("Connexion clique");
             }
+            nbTryCatch = 0;
         }
         catch(WebDriverException)
         {
+            nbTryCatch++;
             clickConnection();
             Console.WriteLine("Connexion clique missss");
         }
     }
 
-    public void run()
+    public void getCoins()
     {
-        for (int i = 1; i < 4; i++)
+        try
         {
-            initPlayerList(0, 5000, i);
-            //SetTimer();
+            checkNbTryCatch();
+            Thread.Sleep(300);
+            IWebElement coinsElem = browser.FindElement(By.XPath("//div[contains(@class,'view-navbar-currency-coins')]"));
+            coins = convertPrice(coinsElem.Text);
+        }
+        catch (OpenQA.Selenium.WebDriverException)
+        {
+            nbTryCatch++;
+            GotoMarket();
+        }
+    }
+
+    public void run(int pagination = 1)
+    {
+        while (pagination < 6)
+        {
+            initPlayerList(1000, 10000, pagination);
             browser.Navigate().GoToUrl("https://www.easports.com/fr/fifa/ultimate-team/web-app/");
             Console.WriteLine("End goto");
             Thread.Sleep(5000);
@@ -142,6 +168,12 @@ public class Launcher
             //ReListerTout()
 
             GetPlayersOnMarcketList();
+            getCoins();
+            if(playersOnMarcket.Count >99 || coins < 70000)
+            {
+                Thread.Sleep(2000);
+                run(pagination);
+            }
 
             foreach (Player player in playerList)
             {
@@ -156,8 +188,9 @@ public class Launcher
                     }
                 }
             }
+        pagination++;
         }
-        run();
+        run(pagination);
     }
 
     public void Login(string mail, string pass)
@@ -177,6 +210,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             Thread.Sleep(300);
             IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
             transferButton.Click();
@@ -185,9 +219,11 @@ public class Launcher
             Thread.Sleep(300);
             marketPlace.Click();
             Console.WriteLine("Enter on market");
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             GotoMarket();
         }
     }
@@ -211,6 +247,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             IWebElement reinitialiser = browser.FindElement(By.XPath("//button[contains(text(), 'Réinitialiser')]"));
             reinitialiser.Click();
             IWebElement playerInput = browser.FindElement(By.XPath("//input[@placeholder='Saisissez nom joueur']"));
@@ -229,8 +266,10 @@ public class Launcher
                 Console.WriteLine("Joueur a rechercher saisie : " + p.name);
                 tryBuyPlayer(p);
             }
+            nbTryCatch = 0;
         }catch(Exception e)
         {
+            nbTryCatch++;
             Console.WriteLine("Erreur dans la recherche de : " + p.name);
             FindPlayer(p);
         }
@@ -241,15 +280,18 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             Thread.Sleep(300);
             IWebElement element = browser.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Max')]/parent::div/following-sibling::div/div/input"));
             element.Clear();
             Thread.Sleep(300);
             element.SendKeys(Convert.ToInt32(p.price / (1 + POURCENTAGE_ACHAT / 100)).ToString());
             Console.WriteLine("recherche de : " + p.name + " au prix de " + p.price);
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             Console.WriteLine("élément non trouver dans la saisie du prix de : " + p.name);
             FindPlayer(p);
         }
@@ -257,7 +299,7 @@ public class Launcher
 
     public bool IsBuyable(string time)
     {
-        List<string> buyableTime = new List<string> { "55 minutes", "56 minutes", "57 minutes", "58 minutes", "59 minutes", "1 Heure", "1 heure" };
+        List<string> buyableTime = new List<string> { "59 minutes", "1 Heure", "1 heure" };
         foreach (string s in buyableTime)
         {
             if(s == time)
@@ -267,6 +309,7 @@ public class Launcher
             }
         }
         Console.WriteLine("not buyable");
+        nbOfTry = 2;
         return false;
     }
 
@@ -332,6 +375,7 @@ public class Launcher
         //GotoMarket();
         try
         {
+            checkNbTryCatch();
             IWebElement element = browser.FindElement(By.XPath("//h1[contains(text(), 'Résultats')]/preceding::button"));
             Thread.Sleep(300);
             element.Click();
@@ -364,9 +408,11 @@ public class Launcher
             searchButton.Click();
             tryBuyPlayer(p);
             Console.WriteLine("Joueur raté... Nouvelle recherche");
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             RetryBuyPlayer(p);
         }
     }
@@ -376,6 +422,7 @@ public class Launcher
         // click on acheter 
         try
         {
+            checkNbTryCatch();
             IWebElement offreButton = browser.FindElement(By.XPath("//button[contains(text(),'Achat immédiat')]"));
             Thread.Sleep(100);
             offreButton.Click();
@@ -391,9 +438,11 @@ public class Launcher
             {
                 RetryBuyPlayer(p);
             }
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             RetryBuyPlayer(p);
             Console.WriteLine("Erreur lors de l'achat du joueur");
         }
@@ -428,6 +477,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             GoToMarcketList();
 
             if (IsSomethingToList())
@@ -444,9 +494,11 @@ public class Launcher
             {
                 Console.WriteLine("Rien à relisté");
             }
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             Console.WriteLine("Erreur lors du relistage de tout les joueurs");
             ReListerTout();
         }
@@ -471,6 +523,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             IWebElement lister = browser.FindElement(By.XPath("//span[contains(text(),'Lister sur Marché')]"));
             lister.Click();
             Thread.Sleep(1000);
@@ -479,9 +532,11 @@ public class Launcher
             IWebElement listerElement = browser.FindElement(By.XPath("//button[contains(text(),'Lister élément')]"));
             listerElement.Click();                
             Console.WriteLine("joueur mis sur la liste des transferts");
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             SetPlayertoSellList(p);
         }
     }
@@ -490,6 +545,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             Thread.Sleep(1000);
             IWebElement minimumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix de départ')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
             IWebElement maximumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix achat immédiat')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
@@ -498,9 +554,11 @@ public class Launcher
             minimumPrice.Click();
             minimumPrice.SendKeys((p.price+p.price*POURCENTAGE_VENTE/100).ToString());
             maximumPrice.Click();
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             setMinimumPriceSold(p);
         }
     }
@@ -509,6 +567,7 @@ public class Launcher
     {
         try
         {
+            checkNbTryCatch();
             Thread.Sleep(1000);
             IWebElement maximumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix achat immédiat')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
             IWebElement minimumPrice = browser.FindElement(By.XPath("//div[contains(@class,'panelAction')]/div/span[contains(text(),'Prix de départ')]/ancestor::div[contains(@class, 'panelActionRow')]/descendant::input"));
@@ -517,9 +576,11 @@ public class Launcher
             maximumPrice.Click();
             maximumPrice.SendKeys((p.price+p.price * POURCENTAGE_VENTE / 100).ToString());
             minimumPrice.Click();
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             setMaximumPriceSold(p);
         }
     }
@@ -571,6 +632,7 @@ public class Launcher
     public void GetPlayersOnMarcketList()
     {
         try {
+            checkNbTryCatch();
             //GoTo marcket List
             GoToMarcketList();
             if (IsSomethingToList())
@@ -601,9 +663,11 @@ public class Launcher
                     playersOnMarcket.Add(new Player(nameElement.Text, convertPrice(priceElement.Text)));
                 }
             }
+            nbTryCatch = 0;
         }
         catch(OpenQA.Selenium.WebDriverException)
         {
+            nbTryCatch++;
             GetPlayersOnMarcketList();
         }
         }
