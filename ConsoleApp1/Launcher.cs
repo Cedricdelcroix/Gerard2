@@ -31,49 +31,49 @@ public class Launcher
     }
 
 
-    public void initPlayerList(int priceStart, int priceEnd, int pageIndex)
-    {
-        //playerList.Add(new Player("gregersen", 300));
-        // playerList.Add(new Player("lasse nilsen", 300));
-        //playerList.Add(new Player("Doucouré", 1500));
-        //playerList.Add(new Player("Lerma", 600));
-        //playerList.Add(new Player("Masuaku", 1100));
-        playerList.Clear();
-        playersOnMarcket.Clear();
-        browser.Navigate().GoToUrl("https://www.futbin.com/players?page="+pageIndex+"&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc&version=all_nif");
-        var elemTable = browser.FindElement(By.XPath("//table[@id = 'repTb']/tbody"));
-        List<IWebElement> listItem = new List<IWebElement>(elemTable.FindElements(By.TagName("tr")));
-        foreach (var elem in listItem)
-        {
-            IWebElement nameElement = elem.FindElement(By.TagName("a"));
-            IWebElement priceElement = elem.FindElement(By.CssSelector(".ps4_color"));
-            if (nameElement.Text.Contains(" ") && !priceElement.Text.Equals("0"))
-            {
-                playerList.Add(new Player(nameElement.Text, convertPrice(priceElement.Text)));
-            }
-        }
+    //public void initPlayerList(int priceStart, int priceEnd, int pageIndex)
+    //{
+    //    //playerList.Add(new Player("gregersen", 300));
+    //    // playerList.Add(new Player("lasse nilsen", 300));
+    //    //playerList.Add(new Player("Doucouré", 1500));
+    //    //playerList.Add(new Player("Lerma", 600));
+    //    //playerList.Add(new Player("Masuaku", 1100));
+    //    playerList.Clear();
+    //    playersOnMarcket.Clear();
+    //    browser.Navigate().GoToUrl("https://www.futbin.com/players?page="+pageIndex+"&ps_price=" + priceStart + "-" + priceEnd + "&sort=likes&order=desc&version=all_nif");
+    //    var elemTable = browser.FindElement(By.XPath("//table[@id = 'repTb']/tbody"));
+    //    List<IWebElement> listItem = new List<IWebElement>(elemTable.FindElements(By.TagName("tr")));
+    //    foreach (var elem in listItem)
+    //    {
+    //        IWebElement nameElement = elem.FindElement(By.TagName("a"));
+    //        IWebElement priceElement = elem.FindElement(By.CssSelector(".ps4_color"));
+    //        if (nameElement.Text.Contains(" ") && !priceElement.Text.Equals("0"))
+    //        {
+    //            playerList.Add(new Player(nameElement.Text, convertPrice(priceElement.Text)));
+    //        }
+    //    }
 
-    }
+    //}
 
-    public int convertPrice(string price)
-    {
-        price = price.Replace(" ", "");
-        if (string.Empty != price)
-        {
-            if (price.Contains("K"))
-            {
-                double tmp;
-                double.TryParse(price.Replace("K", "").Replace(".",","), out tmp);
+    //public int convertPrice(string price)
+    //{
+    //    price = price.Replace(" ", "");
+    //    if (string.Empty != price)
+    //    {
+    //        if (price.Contains("K"))
+    //        {
+    //            double tmp;
+    //            double.TryParse(price.Replace("K", "").Replace(".",","), out tmp);
 
-                return Convert.ToInt32(tmp * 1000);
-            }
-            else
-            {
-                return int.Parse(price.Replace("K", ""));
-            }
-        }
-        return 0;
-    }
+    //            return Convert.ToInt32(tmp * 1000);
+    //        }
+    //        else
+    //        {
+    //            return int.Parse(price.Replace("K", ""));
+    //        }
+    //    }
+    //    return 0;
+    //}
 
 
     private void SetTimer()
@@ -193,55 +193,55 @@ public class Launcher
         run(pagination);
     }
 
-    public void Login(string mail, string pass)
-    {
-        Thread.Sleep(10000);
-        IWebElement connexion = browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
-        connexion.Click();
-        IWebElement email = browser.FindElement(By.XPath("//input[@type='email']"));
-        email.SendKeys(mail);
-        IWebElement passwd = browser.FindElement(By.XPath("//input[@type='password']"));
-        passwd.SendKeys(pass);
-        IWebElement btnLogin = browser.FindElement(By.Id("btnLogin"));
-        btnLogin.Click();
-    }
+    //public void Login(string mail, string pass)
+    //{
+    //    Thread.Sleep(10000);
+    //    IWebElement connexion = browser.FindElement(By.XPath("//button[text() = 'Connexion']"));
+    //    connexion.Click();
+    //    IWebElement email = browser.FindElement(By.XPath("//input[@type='email']"));
+    //    email.SendKeys(mail);
+    //    IWebElement passwd = browser.FindElement(By.XPath("//input[@type='password']"));
+    //    passwd.SendKeys(pass);
+    //    IWebElement btnLogin = browser.FindElement(By.Id("btnLogin"));
+    //    btnLogin.Click();
+    //}
 
-    public void GotoMarket()
-    {
-        try
-        {
-            checkNbTryCatch();
-            Thread.Sleep(300);
-            IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
-            transferButton.Click();
-            Thread.Sleep(300);
-            IWebElement marketPlace = browser.FindElement(By.ClassName("ut-tile-transfer-market"));
-            Thread.Sleep(300);
-            marketPlace.Click();
-            Console.WriteLine("Enter on market");
-            nbTryCatch = 0;
-        }
-        catch(OpenQA.Selenium.WebDriverException)
-        {
-            nbTryCatch++;
-            GotoMarket();
-        }
-    }
+    //public void GotoMarket()
+    //{
+    //    try
+    //    {
+    //        checkNbTryCatch();
+    //        Thread.Sleep(300);
+    //        IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
+    //        transferButton.Click();
+    //        Thread.Sleep(300);
+    //        IWebElement marketPlace = browser.FindElement(By.ClassName("ut-tile-transfer-market"));
+    //        Thread.Sleep(300);
+    //        marketPlace.Click();
+    //        Console.WriteLine("Enter on market");
+    //        nbTryCatch = 0;
+    //    }
+    //    catch(OpenQA.Selenium.WebDriverException)
+    //    {
+    //        nbTryCatch++;
+    //        GotoMarket();
+    //    }
+    //}
 
-    public Boolean IsPlayerExist()
-    {
-        try
-        {
-            browser.FindElement(By.XPath("//ul[contains(@class,'playerResultsList')]/button"));
-            Console.WriteLine("Le joueur existe");
-            return true;
-        }
-        catch(NoSuchElementException)
-        {
-            Console.WriteLine("Le joueur n'existe pas");
-            return false;
-        }
-    }
+    //public Boolean IsPlayerExist()
+    //{
+    //    try
+    //    {
+    //        browser.FindElement(By.XPath("//ul[contains(@class,'playerResultsList')]/button"));
+    //        Console.WriteLine("Le joueur existe");
+    //        return true;
+    //    }
+    //    catch(NoSuchElementException)
+    //    {
+    //        Console.WriteLine("Le joueur n'existe pas");
+    //        return false;
+    //    }
+    //}
 
     public void FindPlayer(Player p)
     {
@@ -297,46 +297,46 @@ public class Launcher
         }
     }
 
-    public bool IsBuyable(string time)
-    {
-        List<string> buyableTime = new List<string> { "59 minutes", "1 Heure", "1 heure" };
-        foreach (string s in buyableTime)
-        {
-            if(s == time)
-            {
-                return true;
-                Console.WriteLine("buyable");
-            }
-        }
-        Console.WriteLine("not buyable");
-        nbOfTry = 2;
-        return false;
-    }
+    //public bool IsBuyable(string time)
+    //{
+    //    List<string> buyableTime = new List<string> { "59 minutes", "1 Heure", "1 heure" };
+    //    foreach (string s in buyableTime)
+    //    {
+    //        if(s == time)
+    //        {
+    //            return true;
+    //            Console.WriteLine("buyable");
+    //        }
+    //    }
+    //    Console.WriteLine("not buyable");
+    //    nbOfTry = 2;
+    //    return false;
+    //}
 
-    public bool IsPlayerFind(Player p)
-    {
-        // si le joueur est trouver essayer de l'acheter 
-        try
-        {
-            Thread.Sleep(500);
-            browser.FindElement(By.XPath("//div[contains(@class, 'pagingContainer')]/following-sibling::ul/li"));
-            IWebElement time = browser.FindElement(By.XPath("//span[contains(@class,'time')]"));
-            if (IsBuyable(time.Text))
-            {
-                Console.WriteLine(p.name + " trouvé");
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        catch (OpenQA.Selenium.NoSuchElementException)
-        {
-            Console.WriteLine(p.name + " non trouvé au prix de " + p.price);
-            return false;
-        }
-    }
+    //public bool IsPlayerFind(Player p)
+    //{
+    //    // si le joueur est trouver essayer de l'acheter 
+    //    try
+    //    {
+    //        Thread.Sleep(500);
+    //        browser.FindElement(By.XPath("//div[contains(@class, 'pagingContainer')]/following-sibling::ul/li"));
+    //        IWebElement time = browser.FindElement(By.XPath("//span[contains(@class,'time')]"));
+    //        if (IsBuyable(time.Text))
+    //        {
+    //            Console.WriteLine(p.name + " trouvé");
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            return false;
+    //        }
+    //    }
+    //    catch (OpenQA.Selenium.NoSuchElementException)
+    //    {
+    //        Console.WriteLine(p.name + " non trouvé au prix de " + p.price);
+    //        return false;
+    //    }
+    //}
 
     public void tryBuyPlayer(Player p)
     {
@@ -376,6 +376,7 @@ public class Launcher
         try
         {
             checkNbTryCatch();
+            Thread.Sleep(300);
             IWebElement element = browser.FindElement(By.XPath("//h1[contains(text(), 'Résultats')]/preceding::button"));
             Thread.Sleep(300);
             element.Click();
@@ -464,13 +465,25 @@ public class Launcher
 
     public void GoToMarcketList()
     {
-        Thread.Sleep(300);
-        IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
-        transferButton.Click();
-        Thread.Sleep(300);
-        IWebElement transferListButton = browser.FindElement(By.XPath("//h1[text() = 'Liste de transferts']"));
-        transferListButton.Click();
-        Thread.Sleep(300);
+        try
+        {
+            checkNbTryCatch();
+            Thread.Sleep(300);
+            IWebElement transferButton = browser.FindElement(By.XPath("//button[text() = 'Transferts']"));
+            transferButton.Click();
+            Thread.Sleep(300);
+            IWebElement transferListButton = browser.FindElement(By.XPath("//h1[text() = 'Liste de transferts']"));
+            Thread.Sleep(300);
+            transferListButton.Click();
+            Thread.Sleep(300);
+            nbTryCatch = 0;
+        }
+        catch (OpenQA.Selenium.WebDriverException)
+        {
+            nbTryCatch++;
+            Console.WriteLine("Erreur pour aller sur le marché des transfert");
+            GoToMarcketList();
+        }
     }
 
     public void ReListerTout()
@@ -651,6 +664,7 @@ public class Launcher
                 IWebElement listerElement = browser.FindElement(By.XPath("//button[contains(text(),'Effacer')]"));
                 listerElement.Click();
             }
+
             ICollection<IWebElement> elemTable = browser.FindElements(By.XPath("//ul[contains(@class,'itemList')]/li[contains(@class,'listFUTItem')]"));
 
 
