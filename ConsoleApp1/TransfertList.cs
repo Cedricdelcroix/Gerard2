@@ -72,7 +72,7 @@ namespace ConsoleApp1
             try
             {
                 Thread.Sleep(300);
-                IWebElement reList = browser.FindElement(By.XPath("//button[contains(text(), 'Effacer') and not(contains(@style, 'display: none'))]"));
+                IWebElement reList = driver.FindElement(By.XPath("//button[contains(text(), 'Effacer') and not(contains(@style, 'display: none'))]"));
                 return true;
             }
             catch (NoSuchElementException)

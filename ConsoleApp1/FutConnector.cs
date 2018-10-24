@@ -25,11 +25,14 @@ namespace ConsoleApp1
         WebDriverWait wait;
         public FutConnector()
         {
-            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            
             XmlConfigurator.Configure();
             ChromeOptions chOption = new ChromeOptions();
             chOption.AddArgument("user-data-dir=D:/Profiles/cdelcroix/AppData/Local/Google/Chrome");
+            chOption.AddArgument("--no-sandbox");
+            chOption.AddArgument("--disable-dev-shm-usage");
             driver = new ChromeDriver(chOption);
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
             marketPlace = new MarketPlace(driver);
             transfertList = new TransfertList(driver);
             futBinAccess = new FutBinAccess(driver);
@@ -39,26 +42,56 @@ namespace ConsoleApp1
 
         public void run(int pagination = 1)
         {
-            //Récupérer la liste des joueurs
-            playerList = futBinAccess.initPlayerList(2000,15000,pagination);
-            //Aller sur EaSport
-            OpenEaFut();
-            clickConnection();
-            if (IsLogged())
+            while (pagination < 4)
             {
+                //Récupérer la liste des joueurs
+                playerList = futBinAccess.initPlayerList(2000, 15000, pagination);
+                //Aller sur EaSport
+                OpenEaFut();
+                clickConnection();
+                if (IsLogged())
+                {
 
+                }
+                playerOnMarket = transfertList.GetPlayersOnTransfertList();
+                getCoins();
+                //verifier la taille de la liste et les crédits
+                if (playerOnMarket.Count > 99 || coins < 70000)
+                {
+                    Thread.Sleep(2000);
+                    run(pagination);
+                }
+
+                foreach (Player player in playerList)
+                {
+                    marketPlace.nbOfTry = 0;
+                    if (!IsPlayerOnMarcketList(player))
+                    {
+                        marketPlace.GoToMarketPlace();
+                        marketPlace.FindPlayer(player);
+                    }
+                }
+                pagination++;
             }
-            //Se connecter
+            run(pagination);
+        }
 
-            //Aller sur la liste des joueur
+        public bool IsPlayerOnMarcketList(Player player)
+        {
+            foreach (Player p in playerOnMarket)
+            {
+                if (Utils.RemoveDiacritics(player.name).ToLower().Contains(Utils.RemoveDiacritics(p.name).ToLower()) || Utils.RemoveDiacritics(p.name).ToLower().Contains(Utils.RemoveDiacritics(player.name).ToLower()))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-            //récupérer la liste des joueurs
-
-            //récupérer les crédits.
-
-            //verifier la taille de la liste et les crédits
-
-            //Procedure de recherche
+        public void getCoins()
+        {
+            IWebElement coinsElem = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//div[contains(@class,'view-navbar-currency-coins')]")));
+            coins = Utils.convertPrice(coinsElem.Text);   
         }
 
         public void clickConnection()

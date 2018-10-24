@@ -40,8 +40,8 @@ namespace ConsoleApp1
             //    driver.Manage().Cookies.AddCookie(myCookie);
             //}
 
-            Launcher launcher = new Launcher(driver);
-            launcher.run();
+            FutConnector futConnector = new FutConnector();
+            futConnector.run();
         }
 
         static void getCookies()

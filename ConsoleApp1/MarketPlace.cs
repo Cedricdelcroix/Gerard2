@@ -16,7 +16,7 @@ namespace ConsoleApp1
         public static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private static Double POURCENTAGE_ACHAT = 5.00;
         private static Double POURCENTAGE_VENTE = 10.00;
-        int nbOfTry = 0;
+        public int nbOfTry = 0;
         int count = 0;
         WebDriverWait wait;
         public MarketPlace(IWebDriver webDriver) : base(webDriver)
