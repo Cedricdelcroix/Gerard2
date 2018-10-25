@@ -51,27 +51,26 @@ namespace ConsoleApp1
                 clickConnection();
                 if (IsLogged())
                 {
-
-                }
-                playerOnMarket = transfertList.GetPlayersOnTransfertList();
-                getCoins();
-                //verifier la taille de la liste et les crédits
-                if (playerOnMarket.Count > 99 || coins < 70000)
-                {
-                    Thread.Sleep(2000);
-                    run(pagination);
-                }
-
-                foreach (Player player in playerList)
-                {
-                    marketPlace.nbOfTry = 0;
-                    if (!IsPlayerOnMarcketList(player))
+                    playerOnMarket = transfertList.GetPlayersOnTransfertList();
+                    getCoins();
+                    //verifier la taille de la liste et les crédits
+                    if (playerOnMarket.Count > 99 || coins < 70000)
                     {
-                        marketPlace.GoToMarketPlace();
-                        marketPlace.FindPlayer(player);
+                        Thread.Sleep(2000);
+                        run(pagination);
                     }
+
+                    foreach (Player player in playerList)
+                    {
+                        marketPlace.nbOfTry = 0;
+                        if (!IsPlayerOnMarcketList(player))
+                        {
+                            marketPlace.GoToMarketPlace();
+                            marketPlace.FindPlayer(player);
+                        }
+                    }
+                    pagination++;
                 }
-                pagination++;
             }
             run(pagination);
         }
@@ -96,8 +95,25 @@ namespace ConsoleApp1
 
         public void clickConnection()
         {
-            IWebElement connexion = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[text() = 'Connexion']")));
-            Console.WriteLine("Connexion clique");
+            if (canClick())
+            {
+                IWebElement connexion = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[text() = 'Connexion']")));
+                connexion.Click();
+                Console.WriteLine("Connexion clique");
+            }
+        }
+
+        public bool canClick()
+        {
+            try
+            {
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[text() = 'Connexion']")));
+                return true;
+            }
+            catch (WebDriverTimeoutException)
+            {
+                return false;
+            }
         }
 
         public void OpenEaFut()

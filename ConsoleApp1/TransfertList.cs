@@ -17,7 +17,7 @@ namespace ConsoleApp1
 
         public TransfertList(IWebDriver webDriver) : base(webDriver)
         {
-            
+            wait = new WebDriverWait(webDriver, TimeSpan.FromSeconds(20));
         }
 
         public List<Player> GetPlayersOnTransfertList()
@@ -52,18 +52,27 @@ namespace ConsoleApp1
         public void reListAll()
         {
             IWebElement reList = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(), 'Re-lister tout')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            reList.Click();
             IWebElement yesButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(), 'Oui')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+
+            yesButton.Click();
         }
 
         public void eraseAll()
         {
             IWebElement listerElement = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(),'Effacer')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            listerElement.Click();
         }
 
         public void GoToMarcketList()
         {
             GoToTransfert();
             IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//h1[text() = 'Liste de transferts']")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            element.Click();
             _log.Info("Enter On transfer list");
         }
 

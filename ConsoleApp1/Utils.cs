@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -45,6 +47,19 @@ namespace ConsoleApp1
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
     }
+
+    public void waitForElementPresent(IWebDriver driver, By by,  int timeout)
+    {
+        WebDriverWait wait = (WebDriverWait)new WebDriverWait(driver, TimeSpan.FromSeconds(timeout)).IgnoreExceptionTypes(typeof(StaleElementReferenceException);
+        wait.Until(new SeleniumExtras.WaitHelpers.ExpectedCondition<Boolean>(){ 
+    @Override
+    public Boolean apply(WebDriver webDriver)
+    {
+        WebElement element = webDriver.findElement(by);
+        return element != null && element.isDisplayed();
+    }
+}); 
+}
 
 
 }

@@ -28,6 +28,8 @@ namespace ConsoleApp1
         {
             GoToTransfert();
             IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.ClassName("ut-tile-transfer-market")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            element.Click();
             _log.Info("Enter On market list");
         }
 
@@ -37,8 +39,12 @@ namespace ConsoleApp1
             if (IsPlayerExist())
             {
                 IWebElement playerselect = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//ul[contains(@class,'playerResultsList')]/button")));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+                playerselect.Click();
                 SetPriceSearch(p);
                 IWebElement searchButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(),'Rechercher')]")));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+                searchButton.Click();
                 tryBuyPlayer(p);
             }
         }
@@ -47,6 +53,7 @@ namespace ConsoleApp1
         {
             IWebElement element = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Max')]/parent::div/following-sibling::div/div/input")));
             element.Clear();
+            Thread.Sleep(300);
             element.SendKeys(Convert.ToInt32(p.price / (1 + POURCENTAGE_ACHAT / 100)).ToString());
         }
 
@@ -54,6 +61,7 @@ namespace ConsoleApp1
         {
             IWebElement playerInput = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//input[@placeholder='Saisissez nom joueur']")));
             playerInput.Clear();
+            Thread.Sleep(300);
             playerInput.SendKeys(p.name);
 
         }
@@ -62,7 +70,7 @@ namespace ConsoleApp1
         {
             try
             {
-                Thread.Sleep(300);
+                Thread.Sleep(500);
                 driver.FindElement(By.XPath("//ul[contains(@class,'playerResultsList')]/button"));
                 Console.WriteLine("Le joueur existe");
                 return true;
@@ -167,7 +175,11 @@ namespace ConsoleApp1
         public void BuyPlayer(Player p)
         {
             IWebElement offreButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(),'Achat immédiat')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            offreButton.Click();
             IWebElement confirmeoffreButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(),'Ok')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            confirmeoffreButton.Click();
             Console.WriteLine("Tentative d'achat du joueur " + p.name);
             if (IsPlayerBuy(p))
             {
@@ -181,17 +193,20 @@ namespace ConsoleApp1
 
         public void RetryBuyPlayer(Player p)
         {
-            //GotoMarket();
+            Thread.Sleep(300);
             IWebElement offreButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//h1[contains(text(), 'Résultats')]/preceding::button")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            offreButton.Click();
             IWebElement minimumPrice = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Min')]/parent::div/following-sibling::div/button[contains(@class,'decrement-value')]")));
             IWebElement maximumPrice = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Min')]/parent::div/following-sibling::div/button[contains(@class,'increment-value')]")));
             IWebElement inputminimumPrice = wait.Until<IWebElement>(d => d.FindElement(By.XPath("//h1[contains(text(), 'Prix achat immédiat')]/parent::div/following-sibling::div/div/span[contains(text(), 'Min')]/parent::div/following-sibling::div/div/input")));
-
+            Thread.Sleep(300);
             Random random = new Random();
             int randomNumber = random.Next(0, 7);
             if (randomNumber == 0 || int.Parse(minimumPrice.Text == string.Empty ? "0" : minimumPrice.Text) + p.price * POURCENTAGE_VENTE / 100 > p.price)
             {
                 inputminimumPrice.Clear();
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));                
                 inputminimumPrice.Click();
                 inputminimumPrice.SendKeys(Convert.ToInt32(p.price / 5).ToString());
             }
@@ -200,15 +215,19 @@ namespace ConsoleApp1
                 randomNumber = random.Next(0, 4);
                 if (randomNumber == 0)
                 {
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
                     minimumPrice.Click();
                 }
                 else
                 {
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
                     maximumPrice.Click();
                 }
             }
-
+            Thread.Sleep(400);
             IWebElement searchButton = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(text(),'Rechercher')]")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            searchButton.Click();
             Console.WriteLine("Joueur raté... Nouvelle recherche");
             tryBuyPlayer(p);
         }

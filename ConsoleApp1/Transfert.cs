@@ -21,8 +21,10 @@ namespace ConsoleApp1
 
         protected void GoToTransfert()
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
             IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(By.XPath("//button[text() = 'Transferts']")));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//div[contains (@id,'ClickShield')]")));
+            element.Click();
             _log.Info("Enter On Transfert");
         }
     }

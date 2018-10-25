@@ -18,9 +18,9 @@ namespace ConsoleApp1
         public static void Main(string[] args)
         {
             //getCookies();
-            ChromeOptions chOption = new ChromeOptions();
-            chOption.AddArgument("user-data-dir=D:/Profiles/cdelcroix/AppData/Local/Google/Chrome");
-            IWebDriver driver = new ChromeDriver(chOption);
+            //ChromeOptions chOption = new ChromeOptions();
+            //chOption.AddArgument("user-data-dir=D:/Profiles/cdelcroix/AppData/Local/Google/Chrome");
+            //IWebDriver driver = new ChromeDriver(chOption);
 
             //FirefoxProfile profile = new FirefoxProfile("D:/Profiles/cdelcroix/AppData/Local/Mozilla/Firefox/Profiles");
             //Proxy proxy = new Proxy();
